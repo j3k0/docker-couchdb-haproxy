@@ -16,6 +16,11 @@ This repository contains **Dockerfile** of [Haproxy](http://haproxy.1wt.eu/) for
 
 	docker run -d -p 5984:5984 -e COUCHDB_SERVERS=server1:15984,server2:25984 jeko/couchdb-haproxy
 
+### Environment variables
+
+ * `COUCHDB_BIND`: default="`*:5984`"
+ * `COUCHDB_CHECK`: default="`check inter 5s`"
+
 #### Authentication
 
 To enable Basic HTTP authentication, set `COUCHDB_USERNAME` and `COUCHDB_PASSWORD`.

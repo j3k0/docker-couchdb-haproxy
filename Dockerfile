@@ -5,18 +5,12 @@
 #
 
 # Pull base image.
-FROM ubuntu:14.04
+FROM haproxy:alpine
 
-# Install Haproxy.
-RUN \
-  sed -i 's/^# \(.*-backports\s\)/\1/g' /etc/apt/sources.list && \
-  apt-get update && \
-  apt-get install -y haproxy=1.5.3-1~ubuntu14.04.1 python && \
-  sed -i 's/^ENABLED=.*/ENABLED=1/' /etc/default/haproxy && \
-  rm -rf /var/lib/apt/lists/*
+# Install bash and python.
+RUN apk add --no-cache bash python
 
 # Add files.
-ADD haproxy.cfg.in /etc/haproxy/haproxy.cfg.in
 ADD start.bash /haproxy-start
 
 # Define working directory.
@@ -29,8 +23,18 @@ ENV COUCHDB_SERVERS="localhost:5984"
 ENV COUCHDB_USERNAME=""
 ENV COUCHDB_PASSWORD=""
 
-# For proxy to work, it's sometime necessary to set the hostname right
+# For the proxy to work, it's sometime necessary to set the hostname right
 ENV COUCHDB_HOSTNAME=""
+
+# Health check definition
+ENV COUCHDB_CHECK=""
+
+# Balancing algorithm definition
+ENV COUCHDB_BALANCE=""
+
+# Bind address and port
+# (might be useful to customize when running in net=host mode)
+ENV COUCHDB_BIND="*:5984"
 
 # Define default command.
 CMD ["bash", "/haproxy-start"]

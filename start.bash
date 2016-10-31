@@ -9,15 +9,46 @@ PIDFILE="/var/run/haproxy.pid"
 
 cd "$HAPROXY"
 
-cp haproxy.cfg.in haproxy.cfg
+echo "COUCHDB_BIND: ${COUCHDB_BIND:=*:5984}"
+echo "COUCHDB_CHECK: ${COUCHDB_CHECK:=check inter 5s}"
+echo "COUCHDB_BALANCE: ${COUCHDB_BALANCE:=uri depth 2}"
 
-echo >> haproxy.cfg
-echo "backend couchdbs" >> haproxy.cfg
+cat <<EOF > haproxy.cfg
+global
+        maxconn 512
+        spread-checks 5
+
+defaults
+        mode http
+        log global
+        monitor-uri /_haproxy_health_check
+        option log-health-checks
+        option httplog
+        balance $COUCHDB_BALANCE
+        option forwardfor
+        option redispatch
+        retries 4
+        option http-server-close
+        timeout client 150000
+        timeout server 3600000
+        timeout connect 500
+
+        stats enable
+        stats scope .
+        stats uri /_stats
+
+frontend http-in
+        bind $COUCHDB_BIND
+        default_backend couchdbs
+
+backend couchdbs
+        option httpchk GET /
+EOF
 
 IFS=","
 index=1
 for server in $COUCHDB_SERVERS; do
-	echo "        server couchdb$index $server check inter 5s ssl verify none" >> haproxy.cfg
+	echo "        server couchdb$index $server $COUCHDB_CHECK" >> haproxy.cfg
 	index=$((index + 1))
 done
 
@@ -29,5 +60,9 @@ fi
 if [[ -n $COUCHDB_HOSTNAME ]]; then
 	echo "        http-request set-header Host $COUCHDB_HOSTNAME" >> haproxy.cfg
 fi
+
+echo ">>>>>>>>>> FILE START: $HAPROXY/haproxy.cfg"
+cat "$HAPROXY/haproxy.cfg"
+echo "<<<<<<<<<< FILE END:   $HAPROXY/haproxy.cfg"
 
 exec haproxy -f "$HAPROXY/haproxy.cfg" -p "$PIDFILE"
