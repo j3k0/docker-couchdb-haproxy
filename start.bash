@@ -12,10 +12,11 @@ cd "$HAPROXY"
 echo "COUCHDB_BIND: ${COUCHDB_BIND:=*:5984}"
 echo "COUCHDB_CHECK: ${COUCHDB_CHECK:=check inter 5s}"
 echo "COUCHDB_BALANCE: ${COUCHDB_BALANCE:=uri depth 2}"
+echo "MAXCONN: ${MAXCONN:=512}"
 
 cat <<EOF > haproxy.cfg
 global
-        maxconn 512
+        maxconn $MAXCONN
         spread-checks 5
 
 defaults
