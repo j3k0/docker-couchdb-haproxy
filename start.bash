@@ -29,6 +29,7 @@ defaults
         option forwardfor
         option redispatch
         retries 4
+        option http-server-close
         timeout client 150000
         timeout server 3600000
         timeout connect 500
