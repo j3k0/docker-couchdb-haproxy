@@ -9,7 +9,11 @@ PIDFILE="/var/run/haproxy.pid"
 
 cd "$HAPROXY"
 
-cp haproxy.cfg.in haproxy.cfg
+MAXCONN="${MAXCONN:-512}"
+
+cat haproxy.cfg.in \
+    | sed "s/\$MAXCONN/$MAXCONN/g" \
+    > haproxy.cfg
 
 echo >> haproxy.cfg
 echo "backend couchdbs" >> haproxy.cfg
