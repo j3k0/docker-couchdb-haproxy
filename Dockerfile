@@ -8,7 +8,7 @@
 FROM haproxy:alpine
 
 # Install bash and python.
-RUN apk add --no-cache bash python
+RUN apk add --no-cache bash python3
 
 # Add files.
 ADD start.bash /haproxy-start
