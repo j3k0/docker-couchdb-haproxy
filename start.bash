@@ -43,7 +43,8 @@ frontend http-in
         default_backend couchdbs
 
 backend couchdbs
-        option httpchk GET /
+        option httpchk GET /_up
+        http-check disable-on-404
 EOF
 
 IFS=","
